@@ -1,0 +1,118 @@
+﻿<#@ template language="c#" HostSpecific="True" #>
+<#@ output extension= ".cs" #>
+package com.xx.entitys;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.util.Date;
+
+<#
+	TableHost host = (TableHost)(Host);
+	host.Fieldlist.Sort(CodeCommon.CompareByintOrder);
+#>
+/**
+ * @author:	caolh
+ * @description: <#= host.TableDescription.Length > 0 ? host.TableDescription+"实体" : host.GetModelClass(host.TableName).ToString() + " 实体类" #>
+ * @date: <#= DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss") #>
+ */
+@Entity
+@Table(name = "<#= host.GetModelClass(host.TableName) #>")
+public class <#= getClassName(host.GetModelClass(host.TableName)) #>Entity
+{
+	<# foreach (ColumnInfo c in host.Keys) 
+	{ #>@Id	//id表示这个字段为主键
+	<# if(c.IsIdentity) {#>@GeneratedValue(strategy = GenerationType.IDENTITY)
+	<# }#>@Column(name = "<#= c.ColumnName #>")
+	private <#= getJavaType(c.TypeName) #> <#= getColumnName(c.ColumnName) #>;
+    <# } #>
+
+    <# foreach (ColumnInfo c in host.Fieldlist)
+	{ if (!c.IsPrimaryKey){ #>@Column(name = "<#= c.ColumnName #>")
+	private <#= getJavaType(c.TypeName) #> <#= getColumnName(c.ColumnName) #>;
+	<# }} #>
+<# foreach (ColumnInfo c in host.Fieldlist)
+{ #>	
+	/**
+	 * 获取 <#= string.IsNullOrEmpty(c.Description) ? c.ColumnName : c.Description #>
+	 */
+	public <#= getJavaType(c.TypeName) #> get<#= getMethodName(c.ColumnName) #>() { 
+		return <#= getColumnName(c.ColumnName) #>; 
+	}
+	public void set<#= getMethodName(c.ColumnName) #>(<#= getJavaType(c.TypeName) #> <#= getColumnName(c.ColumnName) #>) { 
+		this.<#= getColumnName(c.ColumnName) #> = <#= getColumnName(c.ColumnName) #>; 
+	}
+<# } #>}
+
+<#+ // 自定义转换java类型 
+private string getJavaType(string typeName) {
+	string cstype = CodeCommon.DbTypeToCS(typeName);
+	switch (cstype)
+    {
+        case "int":
+            return "Integer";
+        case "long":
+            return "Long";
+        case "string":
+            return "String";
+        case "DateTime":
+            return "Date";
+        default:
+            return "";
+    }
+}
+#>
+<#+ // 成员变量 lowerCamelCase 命名
+private string getColumnName(string ColumnName) {
+	string[] list = ColumnName.Split('_');
+    string result = "";
+    foreach (string item in list)
+    {
+    	if (result == "")
+    	{
+    		result += item.Substring(0, 1).ToLower();
+    	}
+    	else
+    	{
+    		result += item.Substring(0, 1).ToUpper();
+    	}
+    	if (item.Length > 1)
+    	{
+    		result += item.Substring(1, item.Length - 1);
+    	}
+    }
+    return result;
+}
+#>
+<#+ // getset 方法命名
+private string getMethodName(string ColumnName) {
+	string[] list = ColumnName.Split('_');
+    string result = "";
+    foreach (string item in list)
+    {
+        result += item.Substring(0, 1).ToUpper();
+        if (item.Length > 1)
+    	{
+    		result += item.Substring(1, item.Length - 1);
+    	}
+    }
+    return result;
+}
+#>
+
+<#+ // class 方法命名
+private string getClassName(string ColumnName) {
+	string[] list = ColumnName.Split('_');
+    string result = "";
+    foreach (string item in list)
+    {
+        result += item.Substring(0, 1).ToUpper();
+        if (item.Length > 1)
+    	{
+    		result += item.Substring(1, item.Length - 1);
+    	}
+    }
+    return result;
+}
+#>
