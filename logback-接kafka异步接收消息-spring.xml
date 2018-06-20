@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+    <springProperty scope="context" name="LOG_ROOT_LEVEL" source="logging.level.root" defaultValue="DEBUG"/>
+
+    <!--定义日志文件的存储地址 勿在 LogBack 的配置中使用相对路径-->
+    <property name="LOG_HOME" value="./logs" />
+    <!--配置规则类的位置-->
+    <conversionRule conversionWord="ip" converterClass="com.bitauto.ep.fx.webapi.configuration.IPLogConfig" />
+    <!--配置日志的格式-->
+    <property name="CONSOLE_LOG_PATTERN" value="Log Begin -%date{yyyy-MM-dd HH:mm:ss}----------------------------------------------------------------------------%n
+Level: %level %n
+IP: %ip %n
+Caller: %logger %n
+Method: %method %n
+Message: %msg %n
+Log End -------------------------------------------------------------------------------------------------%n"
+    />
+    <!-- 控制台输出 -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <!--格式化输出：%d表示日期，%thread表示线程名，%-5level：级别从左显示5个字符宽度%msg：日志消息，%n是换行符-->
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg  %n</pattern>
+        </encoder>
+    </appender>
+    <!-- 按照每天生成日志文件 -->
+    <appender name="INFO_File"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!--日志文件输出的文件名-->
+            <FileNamePattern>${LOG_HOME}/info/%d{yyyy-MM-dd-HH}.%i.log</FileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <!--日志文件保留天数-->
+            <MaxHistory>5</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter"><!-- 只打印错误日志 -->
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <appender name="ERROR_File"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!--日志文件输出的文件名-->
+            <FileNamePattern>${LOG_HOME}/error/%d{yyyy-MM-dd-HH}.%i.log</FileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <!--日志文件保留天数-->
+            <MaxHistory>5</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter"><!-- 只打印错误日志 -->
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <appender name="DEBUG_File"  class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!--日志文件输出的文件名-->
+            <FileNamePattern>${LOG_HOME}/debug/%d{yyyy-MM-dd-HH}.%i.log</FileNamePattern>
+            <maxFileSize>50MB</maxFileSize>
+            <!--日志文件保留天数-->
+            <MaxHistory>5</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter"><!-- 只打印错误日志 -->
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <appender name="kafkaAppender" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder" >
+            <customFields>{"appname":"ep_miniprogram_carloanapi"}</customFields>
+            <includeMdc>true</includeMdc>
+            <includeContext>true</includeContext>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                <rootCauseFirst>true</rootCauseFirst>
+            </throwableConverter>
+        </encoder>
+        <topic>ep_component_log</topic>
+        <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy" />
+        <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
+
+        <producerConfig>bootstrap.servers=172.17.10.40:9092,172.17.10.41:9092,172.17.10.42:9092</producerConfig>
+        <!-- don't wait for a broker to ack the reception of a batch.  -->
+        <producerConfig>acks=0</producerConfig>
+        <!-- wait up to 1000ms and collect log messages before sending them as a batch -->
+        <producerConfig>linger.ms=1000</producerConfig>
+        <!-- even if the producer buffer runs full, do not block the application but start to drop messages -->
+        <!--<producerConfig>max.block.ms=0</producerConfig>-->
+        <producerConfig>block.on.buffer.full=false</producerConfig>
+
+        <!-- kafka连接失败后，使用下面配置进行日志输出 -->
+        <appender-ref ref="STDOUT" />
+
+    </appender>
+
+    <appender name="kafkaAppenderERROR" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+        <encoder charset="UTF-8" class="net.logstash.logback.encoder.LogstashEncoder" >
+            <customFields>{"appname":"ep_miniprogram_carloanapi"}</customFields>
+            <includeMdc>true</includeMdc>
+            <includeContext>true</includeContext>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                <rootCauseFirst>true</rootCauseFirst>
+            </throwableConverter>
+        </encoder>
+        <topic>ep_component_log</topic>
+        <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy" />
+        <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
+        <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.BlockingDeliveryStrategy">
+            <!-- wait indefinitely until the kafka producer was able to send the message -->
+            <timeout>0</timeout>
+        </deliveryStrategy>
+        <producerConfig>bootstrap.servers=172.17.10.40:9092,172.17.10.41:9092,172.17.10.42:9092</producerConfig>
+        <!-- don't wait for a broker to ack the reception of a batch.  -->
+        <producerConfig>acks=0</producerConfig>
+        <!-- wait up to 1000ms and collect log messages before sending them as a batch -->
+        <producerConfig>linger.ms=1000</producerConfig>
+        <!-- even if the producer buffer runs full, do not block the application but start to drop messages -->
+        <producerConfig>max.block.ms=0</producerConfig>
+        <appender-ref ref="STDOUT" />
+        <filter class="ch.qos.logback.classic.filter.LevelFilter"><!-- 只打印错误日志 -->
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+    <springProfile name="dev">
+        <!-- 日志输出级别  线下 -->
+        <root level="INFO">
+            <appender-ref ref="STDOUT" />
+        </root>
+        <logger name="com.bitauto.ep.fx" additivity="false">
+            <appender-ref ref="STDOUT" />
+        </logger>
+    </springProfile>
+
+
+    <springProfile name="online">
+        <!-- 日志输出级别 线上 -->
+        <root level="INFO">
+            <appender-ref ref="kafkaAppenderERROR" />
+        </root>
+        <logger name="com.bitauto.ep.fx" additivity="false">
+            <appender-ref ref="kafkaAppender" />
+        </logger>
+    </springProfile>
+</configuration>
