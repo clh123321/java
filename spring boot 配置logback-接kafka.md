@@ -1,4 +1,16 @@
-### 1，pom.xml引用jar包
+### 1.POM依赖管理
+```
+<dependencyManagement>
+  <dependencies>
+     <dependency>
+    <groupId>ch.qos.logback</groupId>
+    <artifactId>logback-core</artifactId>
+    <version>1.2.3</version>
+    </dependency>
+  </dependencies>
+</dependencyManagement>
+```
+### 2，POM依赖引用
 ```
 <!-- logback的数据写入到kafka -->
 		<dependency>
