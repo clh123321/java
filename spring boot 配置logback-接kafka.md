@@ -29,5 +29,30 @@
 			<version>5.0</version>
 		</dependency>
 ```
-### 2，resources 增加logback-spring.xml 文件
-### 3，[文件](https://github.com/clh123321/java/blob/master/logback-%E6%8E%A5kafka%E5%BC%82%E6%AD%A5%E6%8E%A5%E6%94%B6%E6%B6%88%E6%81%AF-spring.xml)
+### 3，resources 增加logback-spring.xml 文件(特别标记，配置文件，名称必须为logback-spring.xml)
+### 4，增加IPLogConfig 配置类
+```
+package com.bitauto.ep.fx.distributedjob1.configuration;
+
+import ch.qos.logback.classic.pattern.ClassicConverter;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+/**
+ * @desc 配置日志中显示IP.
+ */
+public class IPLogConfig extends ClassicConverter {
+
+    @Override
+    public String convert(ILoggingEvent event) {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+```
+### 4，[文件](https://github.com/clh123321/java/blob/master/logback-%E6%8E%A5kafka%E5%BC%82%E6%AD%A5%E6%8E%A5%E6%94%B6%E6%B6%88%E6%81%AF-spring.xml)
