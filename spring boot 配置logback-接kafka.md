@@ -29,7 +29,7 @@
 			<version>5.0</version>
 		</dependency>
 ```
-### 3，resources 增加logback-spring.xml 文件(特别标记，配置文件，名称必须为logback-spring.xml)
+### 3，resources 增加logback-spring.xml 文件(springboot推荐使用logback-spring.xml而不是logback.xml)  [参考](https://blog.csdn.net/qianyiyiding/article/details/76565810)(logback.xml加载早于application.properties，所以如果你在logback.xml使用了变量时，而恰好这个变量是写在application.properties时，那么就会获取不到，只要改成logback-spring.xml就可以解决)
 ### 4，增加IPLogConfig 配置类
 ```
 package com.bitauto.ep.fx.distributedjob1.configuration;
@@ -56,3 +56,18 @@ public class IPLogConfig extends ClassicConverter {
 }
 ```
 ### 4，[文件](https://github.com/clh123321/java/blob/master/logback-%E6%8E%A5kafka%E5%BC%82%E6%AD%A5%E6%8E%A5%E6%94%B6%E6%B6%88%E6%81%AF-logback-spring.xml)
+
+### 5，其他方式
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+<springProfile name="staging, production">
+    <include resource="logback-production.xml"/>
+</springProfile>
+
+<springProfile name="dev">
+        <include resource="logback-dev.xml"/>
+</springProfile>
+
+</configuration>
+```
