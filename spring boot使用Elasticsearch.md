@@ -67,5 +67,5 @@ public class ElasticsearchConfiguration {
 }
 ```
 备注：
-RestClient.builder(httpHosts).build() 5.0版本
+RestClient.builder(httpHosts).build() 5.0版本  
 RestClient.builder(httpHosts) 6.0版本
