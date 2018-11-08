@@ -1,7 +1,7 @@
 ### 问题一，当前项目如果引用其他项目时，而其他项目需要redis配置获，但是当前项目没有reids配置时，pom.xml 使用exclusions排除依赖传递
 ```
 <dependency>
-    <groupId>com.bitauto.ep.fx</groupId>
+    <groupId>com.fx</groupId>
     <artifactId>utils</artifactId>
     <version>1.0-SNAPSHOT</version>
     <exclusions>
