@@ -32,7 +32,7 @@
 ### 3，resources 增加logback-spring.xml 文件(springboot推荐使用logback-spring.xml而不是logback.xml)  [参考](https://blog.csdn.net/qianyiyiding/article/details/76565810)(logback.xml加载早于application.properties，所以如果你在logback.xml使用了变量时，而恰好这个变量是写在application.properties时，那么就会获取不到，只要改成logback-spring.xml就可以解决)
 ### 4，增加IPLogConfig 配置类
 ```
-package com.bitauto.ep.fx.distributedjob1.configuration;
+package com.configuration;
 
 import ch.qos.logback.classic.pattern.ClassicConverter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
